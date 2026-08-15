@@ -1,0 +1,7 @@
+project:
+  type: default
+  render:
+    - dashboard.qmd
+
+execute:
+  freeze: auto

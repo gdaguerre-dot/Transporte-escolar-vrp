@@ -1,0 +1,244 @@
+---
+title: "Transporte Escolar — Optimización de Rutas"
+subtitle: "Caso de estudio VRP básico · Datos sintéticos inspirados en Baleares"
+author: "Tu nombre"
+format:
+  dashboard:
+    theme: cosmo
+    nav-buttons: [github]
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(dplyr)
+library(readr)
+library(leaflet)
+library(DT)
+library(gt)
+
+# Ejecuta el pipeline completo (genera datos -> resuelve VRP -> calcula KPIs)
+source("R/01_generate_data.R")
+source("R/02_vrp_heuristic.R")
+source("R/03_kpis.R")
+
+centros    <- read_csv("data/synthetic/centros.csv",           show_col_types = FALSE)
+paradas    <- read_csv("data/synthetic/paradas.csv",           show_col_types = FALSE)
+vehiculos  <- read_csv("data/synthetic/vehiculos.csv",         show_col_types = FALSE)
+rutas      <- read_csv("data/synthetic/rutas_optimizadas.csv", show_col_types = FALSE)
+kpis       <- read_csv("data/synthetic/kpis.csv",              show_col_types = FALSE)
+km_por_ruta <- read_csv("data/synthetic/km_por_ruta.csv",      show_col_types = FALSE)
+```
+
+# Overview
+
+## Row {height="18%"}
+
+```{r}
+#| content: valuebox
+#| title: "Km totales (optimizado)"
+list(
+  icon = "signpost-2",
+  color = "primary",
+  value = paste0(kpis$km_total_optimizado, " km")
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Ahorro vs. escenario sin optimizar"
+list(
+  icon = "graph-down-arrow",
+  color = "success",
+  value = paste0(kpis$ahorro_pct, " %")
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Rutas generadas"
+list(
+  icon = "bus-front",
+  color = "info",
+  value = kpis$n_rutas
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Ocupación media"
+list(
+  icon = "people-fill",
+  color = "warning",
+  value = paste0(kpis$ocupacion_media_pct, " %")
+)
+```
+
+## Row {height="82%"}
+
+### Column {width="65%"}
+
+```{r}
+#| title: "Mapa de rutas optimizadas"
+
+rutas_ids <- unique(rutas$id_ruta)
+pal <- colorFactor(rainbow(length(rutas_ids)), rutas_ids)
+
+mapa <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addCircleMarkers(
+    data = centros, lng = ~lon, lat = ~lat,
+    radius = 9, color = "#333333", fillColor = "#FFD966",
+    fillOpacity = 1, stroke = TRUE, weight = 2,
+    label = ~nombre_centro
+  )
+
+for (r in rutas_ids) {
+  tramo  <- rutas %>% filter(id_ruta == r) %>% arrange(orden_parada)
+  centro_id <- unique(tramo$id_centro)
+  depot  <- centros %>% filter(id_centro == centro_id)
+
+  linea <- bind_rows(
+    depot %>% select(lat, lon),
+    tramo %>% select(lat, lon)
+  )
+
+  mapa <- mapa %>%
+    addPolylines(
+      data = linea, lng = ~lon, lat = ~lat,
+      color = pal(r), weight = 3, opacity = 0.8
+    ) %>%
+    addCircleMarkers(
+      data = tramo, lng = ~lon, lat = ~lat,
+      radius = 5, color = pal(r), fillOpacity = 0.9,
+      label = ~paste0(nombre_parada, " · ", alumnos, " alumnos · ", id_vehiculo)
+    )
+}
+
+mapa
+```
+
+### Column {width="35%"}
+
+```{r}
+#| title: "Km y ocupación por ruta"
+
+km_por_ruta %>%
+  select(id_ruta, id_vehiculo, n_paradas, alumnos_ruta, km_ruta, ocupacion_pct) %>%
+  arrange(desc(km_ruta)) %>%
+  gt() %>%
+  cols_label(
+    id_ruta       = "Ruta",
+    id_vehiculo   = "Vehículo",
+    n_paradas     = "Paradas",
+    alumnos_ruta  = "Alumnos",
+    km_ruta       = "Km",
+    ocupacion_pct = "Ocupación %"
+  ) %>%
+  fmt_number(columns = c(km_ruta, ocupacion_pct), decimals = 1) %>%
+  data_color(
+    columns = ocupacion_pct,
+    colors = scales::col_numeric(c("#FDE0DD", "#43A2CA"), domain = c(0, 100))
+  )
+```
+
+# Detalle de rutas
+
+## Row
+
+```{r}
+#| title: "Paradas asignadas por ruta (orden de recogida)"
+
+rutas %>%
+  select(id_ruta, id_vehiculo, orden_parada, nombre_parada, alumnos, tramo_km) %>%
+  arrange(id_ruta, orden_parada) %>%
+  mutate(tramo_km = round(tramo_km, 2)) %>%
+  datatable(
+    rownames = FALSE,
+    colnames = c("Ruta", "Vehículo", "Orden", "Parada", "Alumnos", "Tramo (km)"),
+    options = list(pageLength = 15, dom = "ftip")
+  )
+```
+
+# Modelo de datos
+
+## Row
+
+### Column {width="55%"}
+
+```{mermaid}
+erDiagram
+    EMPRESA ||--o{ LOTE_TRANSPORTE : adjudica
+    LOTE_TRANSPORTE ||--o{ VEHICULO : incluye
+    LOTE_TRANSPORTE ||--o{ RUTA : agrupa
+    RUTA ||--o{ RUTA_DETALLE : contiene
+    VEHICULO ||--o{ RUTA : realiza
+    CENTRO ||--o{ PARADA : tiene
+    PARADA ||--o{ RUTA_DETALLE : aparece_en
+
+    EMPRESA {
+        int id_empresa PK
+        string razon_social
+        string tipo_empresa
+    }
+    LOTE_TRANSPORTE {
+        int id_lote PK
+        string nombre_lote
+        int id_empresa_transporte FK
+        string isla
+        string zona_geografica
+    }
+    VEHICULO {
+        int id_vehiculo PK
+        string nombre
+        int id_lote FK
+        int plazas_ordinarias
+        int plazas_pmr
+    }
+    CENTRO {
+        int id_centro PK
+        string nombre_centro
+        string municipio
+        float lat
+        float lon
+    }
+    PARADA {
+        int id_parada PK
+        int id_centro FK
+        string nombre_parada
+        float lat
+        float lon
+        int alumnos
+    }
+    RUTA {
+        string id_ruta PK
+        int id_centro FK
+        int id_vehiculo FK
+    }
+    RUTA_DETALLE {
+        int id_parada FK
+        int orden_parada
+        float tramo_km
+    }
+```
+
+### Column {width="45%"}
+
+```{r}
+#| title: "Diccionario de datos (resumen)"
+
+tibble::tribble(
+  ~Entidad,          ~Campo,               ~Descripcion,
+  "Centro",          "id_centro",          "Identificador único del centro educativo",
+  "Centro",          "lat / lon",          "Coordenadas del centro",
+  "Parada",          "id_parada",          "Identificador único de la parada",
+  "Parada",          "alumnos",            "Nº de alumnos que suben en esa parada",
+  "Vehiculo",        "plazas_ordinarias",  "Capacidad del vehículo (alumnos)",
+  "Lote_Transporte", "id_empresa",         "Empresa adjudicataria del lote",
+  "Ruta",            "id_vehiculo",        "Vehículo asignado a la ruta",
+  "Ruta_Detalle",    "orden_parada",       "Secuencia de recogida dentro de la ruta"
+) %>%
+  gt() %>%
+  cols_label(Entidad = "Entidad", Campo = "Campo", Descripcion = "Descripción")
+```

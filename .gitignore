@@ -1,0 +1,23 @@
+# R
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# Quarto
+/.quarto/
+/dashboard_files/
+/_freeze/
+dashboard.html
+
+# renv (si se agrega gestión de dependencias mas adelante)
+renv/library/
+renv/local/
+renv/staging/
+
+# Datos generados (se recrean corriendo R/01_generate_data.R)
+data/synthetic/*.csv
+
+# OS
+.DS_Store
+Thumbs.db
