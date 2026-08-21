@@ -1,0 +1,9 @@
+id_vehiculo,nombre,id_lote,plazas_ordinarias,plazas_pmr
+1,V001,1,20,4
+2,V002,1,30,2
+3,V003,1,40,0
+4,V004,1,30,4
+5,V005,3,20,0
+6,V006,2,40,0
+7,V007,3,40,2
+8,V008,2,20,4

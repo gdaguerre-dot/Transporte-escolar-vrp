@@ -1,0 +1,4 @@
+id_lote,nombre_lote,id_empresa_transporte,isla,zona_geografica
+1,Lote-1,1,Mallorca,Palma-Levante
+2,Lote-2,2,Mallorca,Raiguer
+3,Lote-3,3,Mallorca,Migjorn
