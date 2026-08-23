@@ -1,7 +1,7 @@
 ---
 title: "Transporte Escolar — Optimización de Rutas"
 subtitle: "Caso de estudio VRP básico · Datos sintéticos inspirados en Baleares"
-author: "Geronimo Daguerre"
+author: "Tu nombre"
 format:
   dashboard:
     theme: cosmo
@@ -33,7 +33,7 @@ km_por_ruta <- read_csv("data/synthetic/km_por_ruta.csv",      show_col_types = 
 
 # Overview
 
-## Row {height="18%"}
+## Row {height="22%"}
 
 ```{r}
 #| content: valuebox
@@ -47,7 +47,7 @@ list(
 
 ```{r}
 #| content: valuebox
-#| title: "Ahorro vs. escenario sin optimizar"
+#| title: "Ahorro vs. naive"
 list(
   icon = "graph-down-arrow",
   color = "success",
@@ -137,13 +137,10 @@ km_por_ruta %>%
     ocupacion_pct = "Ocupación %"
   ) %>%
   fmt_number(columns = c(km_ruta, ocupacion_pct), decimals = 1) %>%
-data_color(
-  columns = ocupacion_pct,
-  fn = scales::col_numeric(
-    c("#FDE0DD", "#43A2CA"),
-    domain = c(0, 100)
+  data_color(
+    columns = ocupacion_pct,
+    fn = scales::col_numeric(c("#FDE0DD", "#43A2CA"), domain = c(0, 100))
   )
-)
 ```
 
 # Detalle de rutas
@@ -181,7 +178,7 @@ erDiagram
     PARADA ||--o{ RUTA_DETALLE : aparece_en
 
     EMPRESA {
-        int id_empresa_transporte PK
+        int id_empresa PK
         string razon_social
         string tipo_empresa
     }
@@ -238,7 +235,7 @@ tibble::tribble(
   "Parada",          "id_parada",          "Identificador único de la parada",
   "Parada",          "alumnos",            "Nº de alumnos que suben en esa parada",
   "Vehiculo",        "plazas_ordinarias",  "Capacidad del vehículo (alumnos)",
-  "Lote_Transporte", "id_empresa_transporte","Empresa adjudicataria del lote",
+  "Lote_Transporte", "id_empresa",         "Empresa adjudicataria del lote",
   "Ruta",            "id_vehiculo",        "Vehículo asignado a la ruta",
   "Ruta_Detalle",    "orden_parada",       "Secuencia de recogida dentro de la ruta"
 ) %>%
