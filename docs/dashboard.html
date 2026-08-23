@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Tu nombre">
+
+<title>Transporte Escolar — Optimización de Rutas</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="dashboard_files/libs/clipboard/clipboard.min.js"></script>
+<script src="dashboard_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="dashboard_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="dashboard_files/libs/quarto-html/popper.min.js"></script>
+<script src="dashboard_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="dashboard_files/libs/quarto-html/anchor.min.js"></script>
+<link href="dashboard_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="dashboard_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="dashboard_files/libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="dashboard_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="dashboard_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="dashboard_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="dashboard_files/libs/bootstrap/bootstrap-f2f902407e671a240a764838eecf5d94.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="dashboard_files/libs/bootstrap/bootstrap-dark-f2f902407e671a240a764838eecf5d94.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
+<link href="dashboard_files/libs/bootstrap/bootstrap-f2f902407e671a240a764838eecf5d94.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="dashboard_files/libs/quarto-dashboard/quarto-dashboard.js"></script>
+<script src="dashboard_files/libs/quarto-dashboard/stickythead.js"></script>
+
+
+
+<script src="dashboard_files/libs/quarto-dashboard/web-components.js" type="module"></script>
+<script src="dashboard_files/libs/quarto-dashboard/components.js"></script>
+
+<script src="dashboard_files/libs/quarto-diagram/mermaid.min.js"></script>
+<script src="dashboard_files/libs/quarto-diagram/mermaid-init.js"></script>
+<link href="dashboard_files/libs/quarto-diagram/mermaid.css" rel="stylesheet">
+<link href="dashboard_files/libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+
+<script src="dashboard_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<script src="dashboard_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+
+<link href="dashboard_files/libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+
+<script src="dashboard_files/libs/leaflet-1.3.1/leaflet.js"></script>
+
+<link href="dashboard_files/libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
+
+<script src="dashboard_files/libs/proj4-2.6.2/proj4.min.js"></script>
+
+<script src="dashboard_files/libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+
+<link href="dashboard_files/libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
+
+<script src="dashboard_files/libs/leaflet-binding-2.2.3/leaflet.js"></script>
+
+<script src="dashboard_files/libs/leaflet-providers-3.0.0/leaflet-providers.js"></script>
+
+<script src="dashboard_files/libs/leaflet-providers-plugin-2.2.3/leaflet-providers-plugin.js"></script>
+
+<link href="dashboard_files/libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+
+<script src="dashboard_files/libs/datatables-binding-0.34.0/datatables.js"></script>
+
+<link href="dashboard_files/libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+
+<link href="dashboard_files/libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+
+<script src="dashboard_files/libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+
+<link href="dashboard_files/libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="dashboard_files/libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+
+
+
+</head>
+
+<body class="quarto-dashboard dashboard-fill fullcontent quarto-light">
+
+<header id="quarto-dashboard-header">
+<nav class="navbar navbar-expand-md slim" data-bs-theme="dark">
+  <div class="navbar-container container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-controls="dashboard-collapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>    
+
+
+    <div class="navbar-brand-container">
+
+
+      <div class="navbar-title">
+        <div class="navbar-title-text"><a href="#">Transporte Escolar — Optimización de Rutas</a></div>
+        <div class="navbar-subtitle">Caso de estudio VRP básico · Datos sintéticos inspirados en Baleares</div>
+        <div class="navbar-author">Tu nombre</div>
+      </div>
+    </div>
+<div id="dashboard-collapse" class="navbar-collapse collapse"><ul class="navbar-nav navbar-nav-scroll me-auto" role="tablist"><li class="nav-item" role="presentation"><a id="tab-overview" class="nav-link active" data-bs-toggle="tab" role="tab" data-bs-target="#overview" data-scrolling="false" href="#overview" aria-controls="overview" aria-selected="true"><span class="nav-link-text">Overview</span></a></li><li class="nav-item" role="presentation"><a id="tab-detalle-de-rutas" class="nav-link" data-bs-toggle="tab" role="tab" data-bs-target="#detalle-de-rutas" data-scrolling="false" href="#detalle-de-rutas" aria-controls="detalle-de-rutas" aria-selected="false"><span class="nav-link-text">Detalle de rutas</span></a></li><li class="nav-item" role="presentation"><a id="tab-modelo-de-datos" class="nav-link" data-bs-toggle="tab" role="tab" data-bs-target="#modelo-de-datos" data-scrolling="false" href="#modelo-de-datos" aria-controls="modelo-de-datos" aria-selected="false"><span class="nav-link-text">Modelo de datos</span></a></li></ul></div></div>
+</nav>
+</header>
+<div class="page-layout-custom quarto-dashboard-content bslib-gap-spacing html-fill-container bslib-page-fill quarto-dashboard-pages">  
+
+<div class="bslib-grid-item html-fill-item tab-content bslib-grid" data-layout="fill" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div id="overview" class="dashboard-page tab-pane show active html-fill-item html-fill-container" data-orientation="rows" aria-labelledby="tab-overview">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 22fr) minmax(3em, 82fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 1fr) minmax(3em, 1fr) minmax(3em, 1fr) minmax(3em, 1fr);
+grid-auto-rows: minmax(0, 1fr);">
+<div class="card valuebox cell html-fill-item html-fill-container bslib-card bslib-value-box bg-primary showcase-left-center" data-bslib-card-init="" data-require-bs-caller="card()">
+<div class="card-body html-fill-item html-fill-container">
+<div data-icon="signpost-2" class="html-fill-item html-fill-container value-box-grid">
+<div class="value-box-showcase html-fill-item html-fill-container">
+
+<i class="bi bi-signpost-2"></i></div>
+<div class="value-box-area">
+<p class="value-box-title">
+Km totales (optimizado)
+</p>
+<p class="value-box-value">
+35.9 km
+</p>
+</div>
+</div>
+</div>
+<script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div><div class="card valuebox cell html-fill-item html-fill-container bslib-card bslib-value-box bg-success showcase-left-center" data-bslib-card-init="" data-require-bs-caller="card()">
+<div class="card-body html-fill-item html-fill-container">
+<div data-icon="graph-down-arrow" class="html-fill-item html-fill-container value-box-grid">
+<div class="value-box-showcase html-fill-item html-fill-container">
+
+<i class="bi bi-graph-down-arrow"></i></div>
+<div class="value-box-area">
+<p class="value-box-title">
+Ahorro vs. naive
+</p>
+<p class="value-box-value">
+14 %
+</p>
+</div>
+</div>
+</div>
+<script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div><div class="card valuebox cell html-fill-item html-fill-container bslib-card bslib-value-box bg-info showcase-left-center" data-bslib-card-init="" data-require-bs-caller="card()">
+<div class="card-body html-fill-item html-fill-container">
+<div data-icon="bus-front" class="html-fill-item html-fill-container value-box-grid">
+<div class="value-box-showcase html-fill-item html-fill-container">
+
+<i class="bi bi-bus-front"></i></div>
+<div class="value-box-area">
+<p class="value-box-title">
+Rutas generadas
+</p>
+<p class="value-box-value">
+14
+</p>
+</div>
+</div>
+</div>
+<script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div><div class="card valuebox cell html-fill-item html-fill-container bslib-card bslib-value-box bg-warning showcase-left-center" data-bslib-card-init="" data-require-bs-caller="card()">
+<div class="card-body html-fill-item html-fill-container">
+<div data-icon="people-fill" class="html-fill-item html-fill-container value-box-grid">
+<div class="value-box-showcase html-fill-item html-fill-container">
+
+<i class="bi bi-people-fill"></i></div>
+<div class="value-box-area">
+<p class="value-box-title">
+Ocupación media
+</p>
+<p class="value-box-value">
+85.8 %
+</p>
+</div>
+</div>
+</div>
+<script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div>
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 65fr) minmax(3em, 35fr);
+grid-auto-rows: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="Mapa de rutas optimizadas" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+Mapa de rutas optimizadas
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div class="leaflet html-widget html-fill-item html-fill-container" id="htmlwidget-c7ab9ff923acfc8df40f" style="width:100%;height:406px;"></div>
+<script type="application/json" data-for="htmlwidget-c7ab9ff923acfc8df40f">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["CartoDB.Positron",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircleMarkers","args":[[39.58785875361646,39.56415368382586,39.68920833633747,39.56333353904775,39.61939265886322,39.59315835048911],[2.601462341332808,2.999912485200912,2.67304386717733,2.571029766765423,2.71396035964135,3.027251824573614],9,null,null,{"interactive":true,"className":"","stroke":true,"color":"#333333","weight":2,"opacity":0.5,"fill":true,"fillColor":"#FFD966","fillOpacity":1},null,null,null,null,["CEIP Es Pilari","CEIP Son Ferriol","CEIP Camp Redo","CEIP Rafal Vell","CEIP Verge de Lluc","CEIP Gabriel Vallseca"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.601462341332808,2.608109353175259,2.611999943183204],"lat":[39.58785875361646,39.59297632427418,39.58969923103049]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#FF0000","weight":3,"opacity":0.8,"fill":false,"fillColor":"#FF0000","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.59297632427418,39.58969923103049],[2.608109353175259,2.611999943183204],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#FF0000","weight":5,"opacity":0.5,"fill":true,"fillColor":"#FF0000","fillOpacity":0.9},null,null,null,null,["Parada CEIP Es Pilari 6 · 10 alumnos · 1","Parada CEIP Es Pilari 3 · 6 alumnos · 1"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.601462341332808,2.612203849265348,2.609726024382009],"lat":[39.58785875361646,39.5979121981504,39.6029045326693]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#FF6D00","weight":3,"opacity":0.8,"fill":false,"fillColor":"#FF6D00","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.5979121981504,39.6029045326693],[2.612203849265348,2.609726024382009],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#FF6D00","weight":5,"opacity":0.5,"fill":true,"fillColor":"#FF6D00","fillOpacity":0.9},null,null,null,null,["Parada CEIP Es Pilari 2 · 14 alumnos · 2","Parada CEIP Es Pilari 5 · 13 alumnos · 2"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.601462341332808,2.611321314312458,2.597921483536901],"lat":[39.58785875361646,39.57420111037231,39.56761843388755]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#FFDB00","weight":3,"opacity":0.8,"fill":false,"fillColor":"#FFDB00","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.57420111037231,39.56761843388755],[2.611321314312458,2.597921483536901],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#FFDB00","weight":5,"opacity":0.5,"fill":true,"fillColor":"#FFDB00","fillOpacity":0.9},null,null,null,null,["Parada CEIP Es Pilari 4 · 8 alumnos · 3","Parada CEIP Es Pilari 1 · 12 alumnos · 3"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.999912485200912,2.994726927679256,2.984085233958472],"lat":[39.56415368382586,39.56887818765245,39.57906870912511]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#B6FF00","weight":3,"opacity":0.8,"fill":false,"fillColor":"#B6FF00","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.56887818765245,39.57906870912511],[2.994726927679256,2.984085233958472],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#B6FF00","weight":5,"opacity":0.5,"fill":true,"fillColor":"#B6FF00","fillOpacity":0.9},null,null,null,null,["Parada CEIP Son Ferriol 4 · 10 alumnos · 1","Parada CEIP Son Ferriol 2 · 9 alumnos · 1"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.999912485200912,2.98927524460391,3.000258612103109,3.020190955424659],"lat":[39.56415368382586,39.56218651220215,39.5529410631292,39.56899726129423]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#49FF00","weight":3,"opacity":0.8,"fill":false,"fillColor":"#49FF00","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.56218651220215,39.5529410631292,39.56899726129423],[2.98927524460391,3.000258612103109,3.020190955424659],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#49FF00","weight":5,"opacity":0.5,"fill":true,"fillColor":"#49FF00","fillOpacity":0.9},null,null,null,null,["Parada CEIP Son Ferriol 1 · 11 alumnos · 2","Parada CEIP Son Ferriol 3 · 5 alumnos · 2","Parada CEIP Son Ferriol 5 · 14 alumnos · 2"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.67304386717733,2.676686210874181,2.678422384520883,2.684111076791887],"lat":[39.68920833633747,39.6917996351624,39.69376401013059,39.68520984773344]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#00FF24","weight":3,"opacity":0.8,"fill":false,"fillColor":"#00FF24","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.6917996351624,39.69376401013059,39.68520984773344],[2.676686210874181,2.678422384520883,2.684111076791887],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#00FF24","weight":5,"opacity":0.5,"fill":true,"fillColor":"#00FF24","fillOpacity":0.9},null,null,null,null,["Parada CEIP Camp Redo 3 · 6 alumnos · 1","Parada CEIP Camp Redo 4 · 3 alumnos · 1","Parada CEIP Camp Redo 6 · 5 alumnos · 1"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.67304386717733,2.673679917898096,2.660182372459623,2.660820962580045],"lat":[39.68920833633747,39.68318045490016,39.69069458726361,39.6962237013331]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#00FF92","weight":3,"opacity":0.8,"fill":false,"fillColor":"#00FF92","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.68318045490016,39.69069458726361,39.6962237013331],[2.673679917898096,2.660182372459623,2.660820962580045],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#00FF92","weight":5,"opacity":0.5,"fill":true,"fillColor":"#00FF92","fillOpacity":0.9},null,null,null,null,["Parada CEIP Camp Redo 5 · 8 alumnos · 2","Parada CEIP Camp Redo 2 · 14 alumnos · 2","Parada CEIP Camp Redo 1 · 8 alumnos · 2"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.571029766765423,2.572044291982033,2.56719704105947],"lat":[39.56333353904775,39.56325915990051,39.57076494146594]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#00FFFF","weight":3,"opacity":0.8,"fill":false,"fillColor":"#00FFFF","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.56325915990051,39.57076494146594],[2.572044291982033,2.56719704105947],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#00FFFF","weight":5,"opacity":0.5,"fill":true,"fillColor":"#00FFFF","fillOpacity":0.9},null,null,null,null,["Parada CEIP Rafal Vell 2 · 14 alumnos · 1","Parada CEIP Rafal Vell 1 · 6 alumnos · 1"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.571029766765423,2.574633116182866,2.578994510801526,2.560219316502568],"lat":[39.56333353904775,39.5588359379302,39.55398557217096,39.55394077574435]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#0092FF","weight":3,"opacity":0.8,"fill":false,"fillColor":"#0092FF","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.5588359379302,39.55398557217096,39.55394077574435],[2.574633116182866,2.578994510801526,2.560219316502568],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#0092FF","weight":5,"opacity":0.5,"fill":true,"fillColor":"#0092FF","fillOpacity":0.9},null,null,null,null,["Parada CEIP Rafal Vell 7 · 9 alumnos · 2","Parada CEIP Rafal Vell 6 · 11 alumnos · 2","Parada CEIP Rafal Vell 5 · 5 alumnos · 2"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.571029766765423,2.563518835808563,2.561808083530146],"lat":[39.56333353904775,39.5599815367161,39.55510505689943]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#0024FF","weight":3,"opacity":0.8,"fill":false,"fillColor":"#0024FF","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.5599815367161,39.55510505689943],[2.563518835808563,2.561808083530146],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#0024FF","weight":5,"opacity":0.5,"fill":true,"fillColor":"#0024FF","fillOpacity":0.9},null,null,null,null,["Parada CEIP Rafal Vell 4 · 15 alumnos · 3","Parada CEIP Rafal Vell 3 · 14 alumnos · 3"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.71396035964135,2.711131955332145,2.705435480876959,2.711000057099802],"lat":[39.61939265886322,39.61185778595075,39.61218954381745,39.63778398637744]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#4900FF","weight":3,"opacity":0.8,"fill":false,"fillColor":"#4900FF","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.61185778595075,39.61218954381745,39.63778398637744],[2.711131955332145,2.705435480876959,2.711000057099802],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#4900FF","weight":5,"opacity":0.5,"fill":true,"fillColor":"#4900FF","fillOpacity":0.9},null,null,null,null,["Parada CEIP Verge de Lluc 1 · 8 alumnos · 1","Parada CEIP Verge de Lluc 3 · 6 alumnos · 1","Parada CEIP Verge de Lluc 5 · 5 alumnos · 1"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[2.71396035964135,2.701643308837669,2.717042964151229],"lat":[39.61939265886322,39.63572048824558,39.64564065477942]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#B600FF","weight":3,"opacity":0.8,"fill":false,"fillColor":"#B600FF","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.63572048824558,39.64564065477942],[2.701643308837669,2.717042964151229],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#B600FF","weight":5,"opacity":0.5,"fill":true,"fillColor":"#B600FF","fillOpacity":0.9},null,null,null,null,["Parada CEIP Verge de Lluc 2 · 13 alumnos · 2","Parada CEIP Verge de Lluc 4 · 10 alumnos · 2"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[3.027251824573614,3.024062957246847,3.029071161022187],"lat":[39.59315835048911,39.59039520366329,39.60992747032708]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#FF00DB","weight":3,"opacity":0.8,"fill":false,"fillColor":"#FF00DB","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.59039520366329,39.60992747032708],[3.024062957246847,3.029071161022187],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#FF00DB","weight":5,"opacity":0.5,"fill":true,"fillColor":"#FF00DB","fillOpacity":0.9},null,null,null,null,["Parada CEIP Gabriel Vallseca 3 · 8 alumnos · 1","Parada CEIP Gabriel Vallseca 4 · 11 alumnos · 1"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[3.027251824573614,3.033079040823901,3.048415660950238],"lat":[39.59315835048911,39.59948061851937,39.59858271278835]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"#FF006D","weight":3,"opacity":0.8,"fill":false,"fillColor":"#FF006D","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[39.59948061851937,39.59858271278835],[3.033079040823901,3.048415660950238],5,null,null,{"interactive":true,"className":"","stroke":true,"color":"#FF006D","weight":5,"opacity":0.5,"fill":true,"fillColor":"#FF006D","fillOpacity":0.9},null,null,null,null,["Parada CEIP Gabriel Vallseca 2 · 15 alumnos · 2","Parada CEIP Gabriel Vallseca 1 · 13 alumnos · 2"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[39.5529410631292,39.6962237013331],"lng":[2.560219316502568,3.048415660950238]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div><div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="Km y ocupación por ruta" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+Km y ocupación por ruta
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div id="hlzdmnupwa" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;" class="html-fill-item html-fill-container">
+<style>#hlzdmnupwa table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#hlzdmnupwa thead, #hlzdmnupwa tbody, #hlzdmnupwa tfoot, #hlzdmnupwa tr, #hlzdmnupwa td, #hlzdmnupwa th {
+  border-style: none;
+}
+
+#hlzdmnupwa p {
+  margin: 0;
+  padding: 0;
+}
+
+#hlzdmnupwa .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#hlzdmnupwa .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#hlzdmnupwa .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#hlzdmnupwa .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#hlzdmnupwa .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#hlzdmnupwa .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#hlzdmnupwa .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#hlzdmnupwa .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#hlzdmnupwa .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#hlzdmnupwa .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#hlzdmnupwa .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#hlzdmnupwa .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#hlzdmnupwa .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#hlzdmnupwa .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#hlzdmnupwa .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hlzdmnupwa .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#hlzdmnupwa .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#hlzdmnupwa .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#hlzdmnupwa .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hlzdmnupwa .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#hlzdmnupwa .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hlzdmnupwa .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#hlzdmnupwa .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hlzdmnupwa .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#hlzdmnupwa .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hlzdmnupwa .gt_left {
+  text-align: left;
+}
+
+#hlzdmnupwa .gt_center {
+  text-align: center;
+}
+
+#hlzdmnupwa .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#hlzdmnupwa .gt_font_normal {
+  font-weight: normal;
+}
+
+#hlzdmnupwa .gt_font_bold {
+  font-weight: bold;
+}
+
+#hlzdmnupwa .gt_font_italic {
+  font-style: italic;
+}
+
+#hlzdmnupwa .gt_super {
+  font-size: 65%;
+}
+
+#hlzdmnupwa .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#hlzdmnupwa .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#hlzdmnupwa .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#hlzdmnupwa .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#hlzdmnupwa .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#hlzdmnupwa .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#hlzdmnupwa .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#hlzdmnupwa .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#hlzdmnupwa div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_col_headings header">
+<th id="id_ruta" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Ruta</th>
+<th id="id_vehiculo" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Vehículo</th>
+<th id="n_paradas" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Paradas</th>
+<th id="alumnos_ruta" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Alumnos</th>
+<th id="km_ruta" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Km</th>
+<th id="ocupacion_pct" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Ocupación %</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="id_ruta">C2-R2</td>
+<td class="gt_row gt_right" headers="id_vehiculo">2</td>
+<td class="gt_row gt_right" headers="n_paradas">3</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">30</td>
+<td class="gt_row gt_right" headers="km_ruta">4.8</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #43A2CA; color: #FFFFFF">100.0</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="id_ruta">C5-R1</td>
+<td class="gt_row gt_right" headers="id_vehiculo">1</td>
+<td class="gt_row gt_right" headers="n_paradas">3</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">19</td>
+<td class="gt_row gt_right" headers="km_ruta">4.2</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #52A5CB; color: #FFFFFF">95.0</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="id_ruta">C5-R2</td>
+<td class="gt_row gt_right" headers="id_vehiculo">2</td>
+<td class="gt_row gt_right" headers="n_paradas">2</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">23</td>
+<td class="gt_row gt_right" headers="km_ruta">3.8</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #7CB0CF; color: #000000">76.7</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="id_ruta">C1-R3</td>
+<td class="gt_row gt_right" headers="id_vehiculo">3</td>
+<td class="gt_row gt_right" headers="n_paradas">2</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">20</td>
+<td class="gt_row gt_right" headers="km_ruta">3.1</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #ADC1D4; color: #000000">50.0</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="id_ruta">C4-R2</td>
+<td class="gt_row gt_right" headers="id_vehiculo">2</td>
+<td class="gt_row gt_right" headers="n_paradas">3</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">25</td>
+<td class="gt_row gt_right" headers="km_ruta">2.9</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #6EACCD; color: #000000">83.3</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="id_ruta">C3-R2</td>
+<td class="gt_row gt_right" headers="id_vehiculo">2</td>
+<td class="gt_row gt_right" headers="n_paradas">3</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">30</td>
+<td class="gt_row gt_right" headers="km_ruta">2.7</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #43A2CA; color: #FFFFFF">100.0</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="id_ruta">C6-R1</td>
+<td class="gt_row gt_right" headers="id_vehiculo">1</td>
+<td class="gt_row gt_right" headers="n_paradas">2</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">19</td>
+<td class="gt_row gt_right" headers="km_ruta">2.6</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #52A5CB; color: #FFFFFF">95.0</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="id_ruta">C6-R2</td>
+<td class="gt_row gt_right" headers="id_vehiculo">2</td>
+<td class="gt_row gt_right" headers="n_paradas">2</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">28</td>
+<td class="gt_row gt_right" headers="km_ruta">2.2</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #56A6CB; color: #FFFFFF">93.3</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="id_ruta">C2-R1</td>
+<td class="gt_row gt_right" headers="id_vehiculo">1</td>
+<td class="gt_row gt_right" headers="n_paradas">2</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">19</td>
+<td class="gt_row gt_right" headers="km_ruta">2.1</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #52A5CB; color: #FFFFFF">95.0</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="id_ruta">C1-R2</td>
+<td class="gt_row gt_right" headers="id_vehiculo">2</td>
+<td class="gt_row gt_right" headers="n_paradas">2</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">27</td>
+<td class="gt_row gt_right" headers="km_ruta">2.0</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #5FA8CC; color: #FFFFFF">90.0</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="id_ruta">C3-R1</td>
+<td class="gt_row gt_right" headers="id_vehiculo">1</td>
+<td class="gt_row gt_right" headers="n_paradas">3</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">14</td>
+<td class="gt_row gt_right" headers="km_ruta">1.8</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #89B5D0; color: #000000">70.0</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="id_ruta">C4-R3</td>
+<td class="gt_row gt_right" headers="id_vehiculo">3</td>
+<td class="gt_row gt_right" headers="n_paradas">2</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">29</td>
+<td class="gt_row gt_right" headers="km_ruta">1.3</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #84B3CF; color: #000000">72.5</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="id_ruta">C1-R1</td>
+<td class="gt_row gt_right" headers="id_vehiculo">1</td>
+<td class="gt_row gt_right" headers="n_paradas">2</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">16</td>
+<td class="gt_row gt_right" headers="km_ruta">1.3</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #75AECE; color: #000000">80.0</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="id_ruta">C4-R1</td>
+<td class="gt_row gt_right" headers="id_vehiculo">1</td>
+<td class="gt_row gt_right" headers="n_paradas">2</td>
+<td class="gt_row gt_right" headers="alumnos_ruta">20</td>
+<td class="gt_row gt_right" headers="km_ruta">1.0</td>
+<td class="gt_row gt_right" headers="ocupacion_pct" style="background-color: #43A2CA; color: #FFFFFF">100.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div>
+</div>
+</div>
+</div>
+<div id="detalle-de-rutas" class="dashboard-page tab-pane grid-skip html-fill-item html-fill-container" data-orientation="rows" aria-labelledby="tab-detalle-de-rutas">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 1fr);
+grid-auto-rows: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="Paradas asignadas por ruta (orden de recogida)" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+Paradas asignadas por ruta (orden de recogida)
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div class="datatables html-widget html-fill-item html-fill-container" id="htmlwidget-d67c2027a709d8c7d17c" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-d67c2027a709d8c7d17c">{"x":{"filter":"none","vertical":false,"data":[["C1-R1","C1-R1","C1-R2","C1-R2","C1-R3","C1-R3","C2-R1","C2-R1","C2-R2","C2-R2","C2-R2","C3-R1","C3-R1","C3-R1","C3-R2","C3-R2","C3-R2","C4-R1","C4-R1","C4-R2","C4-R2","C4-R2","C4-R3","C4-R3","C5-R1","C5-R1","C5-R1","C5-R2","C5-R2","C6-R1","C6-R1","C6-R2","C6-R2"],[1,1,2,2,3,3,1,1,2,2,2,1,1,1,2,2,2,1,1,2,2,2,3,3,1,1,1,2,2,1,1,2,2],[1,2,1,2,1,2,1,2,1,2,3,1,2,3,1,2,3,1,2,1,2,3,1,2,1,2,3,1,2,1,2,1,2],["Parada CEIP Es Pilari 6","Parada CEIP Es Pilari 3","Parada CEIP Es Pilari 2","Parada CEIP Es Pilari 5","Parada CEIP Es Pilari 4","Parada CEIP Es Pilari 1","Parada CEIP Son Ferriol 4","Parada CEIP Son Ferriol 2","Parada CEIP Son Ferriol 1","Parada CEIP Son Ferriol 3","Parada CEIP Son Ferriol 5","Parada CEIP Camp Redo 3","Parada CEIP Camp Redo 4","Parada CEIP Camp Redo 6","Parada CEIP Camp Redo 5","Parada CEIP Camp Redo 2","Parada CEIP Camp Redo 1","Parada CEIP Rafal Vell 2","Parada CEIP Rafal Vell 1","Parada CEIP Rafal Vell 7","Parada CEIP Rafal Vell 6","Parada CEIP Rafal Vell 5","Parada CEIP Rafal Vell 4","Parada CEIP Rafal Vell 3","Parada CEIP Verge de Lluc 1","Parada CEIP Verge de Lluc 3","Parada CEIP Verge de Lluc 5","Parada CEIP Verge de Lluc 2","Parada CEIP Verge de Lluc 4","Parada CEIP Gabriel Vallseca 3","Parada CEIP Gabriel Vallseca 4","Parada CEIP Gabriel Vallseca 2","Parada CEIP Gabriel Vallseca 1"],[10,6,14,13,8,12,10,9,11,5,14,6,3,5,8,14,8,14,6,9,11,5,15,14,8,6,5,13,10,8,11,15,13],[0.8100000000000001,0.49,1.45,0.59,1.74,1.36,0.6899999999999999,1.45,0.9399999999999999,1.39,2.47,0.42,0.26,1.07,0.67,1.43,0.62,0.09,0.93,0.59,0.66,1.61,0.74,0.5600000000000001,0.87,0.49,2.89,2.1,1.72,0.41,2.21,0.86,1.32]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Ruta<\/th>\n      <th>Vehículo<\/th>\n      <th>Orden<\/th>\n      <th>Parada<\/th>\n      <th>Alumnos<\/th>\n      <th>Tramo (km)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"bPaginate":false,"dom":"ftip","language":{"info":"Showing _TOTAL_ entries"},"pageLength":15,"columnDefs":[{"className":"dt-right","targets":[1,2,4,5]},{"name":"id_ruta","targets":0},{"name":"id_vehiculo","targets":1},{"name":"orden_parada","targets":2},{"name":"nombre_parada","targets":3},{"name":"alumnos","targets":4},{"name":"tramo_km","targets":5}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,15,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div>
+</div>
+</div>
+<div id="modelo-de-datos" class="dashboard-page tab-pane grid-skip html-fill-item html-fill-container" data-orientation="rows" aria-labelledby="tab-modelo-de-datos">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 55fr) minmax(3em, 45fr);
+grid-auto-rows: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div class="html-fill-item html-fill-container">
+<figure class="figure">
+<div class="html-fill-item html-fill-container">
+<pre class="mermaid mermaid-js">erDiagram
+    EMPRESA ||--o{ LOTE_TRANSPORTE : adjudica
+    LOTE_TRANSPORTE ||--o{ VEHICULO : incluye
+    LOTE_TRANSPORTE ||--o{ RUTA : agrupa
+    RUTA ||--o{ RUTA_DETALLE : contiene
+    VEHICULO ||--o{ RUTA : realiza
+    CENTRO ||--o{ PARADA : tiene
+    PARADA ||--o{ RUTA_DETALLE : aparece_en
+
+    EMPRESA {
+        int id_empresa PK
+        string razon_social
+        string tipo_empresa
+    }
+    LOTE_TRANSPORTE {
+        int id_lote PK
+        string nombre_lote
+        int id_empresa_transporte FK
+        string isla
+        string zona_geografica
+    }
+    VEHICULO {
+        int id_vehiculo PK
+        string nombre
+        int id_lote FK
+        int plazas_ordinarias
+        int plazas_pmr
+    }
+    CENTRO {
+        int id_centro PK
+        string nombre_centro
+        string municipio
+        float lat
+        float lon
+    }
+    PARADA {
+        int id_parada PK
+        int id_centro FK
+        string nombre_parada
+        float lat
+        float lon
+        int alumnos
+    }
+    RUTA {
+        string id_ruta PK
+        int id_centro FK
+        int id_vehiculo FK
+    }
+    RUTA_DETALLE {
+        int id_parada FK
+        int orden_parada
+        float tramo_km
+    }
+</pre>
+</div>
+</figure>
+</div>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div><div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="Diccionario de datos (resumen)" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+Diccionario de datos (resumen)
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div id="hhjyhruigg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;" class="html-fill-item html-fill-container">
+<style>#hhjyhruigg table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#hhjyhruigg thead, #hhjyhruigg tbody, #hhjyhruigg tfoot, #hhjyhruigg tr, #hhjyhruigg td, #hhjyhruigg th {
+  border-style: none;
+}
+
+#hhjyhruigg p {
+  margin: 0;
+  padding: 0;
+}
+
+#hhjyhruigg .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#hhjyhruigg .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#hhjyhruigg .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#hhjyhruigg .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#hhjyhruigg .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#hhjyhruigg .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#hhjyhruigg .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#hhjyhruigg .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#hhjyhruigg .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#hhjyhruigg .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#hhjyhruigg .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#hhjyhruigg .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#hhjyhruigg .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#hhjyhruigg .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#hhjyhruigg .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hhjyhruigg .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#hhjyhruigg .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#hhjyhruigg .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#hhjyhruigg .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hhjyhruigg .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#hhjyhruigg .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hhjyhruigg .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#hhjyhruigg .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hhjyhruigg .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#hhjyhruigg .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#hhjyhruigg .gt_left {
+  text-align: left;
+}
+
+#hhjyhruigg .gt_center {
+  text-align: center;
+}
+
+#hhjyhruigg .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#hhjyhruigg .gt_font_normal {
+  font-weight: normal;
+}
+
+#hhjyhruigg .gt_font_bold {
+  font-weight: bold;
+}
+
+#hhjyhruigg .gt_font_italic {
+  font-style: italic;
+}
+
+#hhjyhruigg .gt_super {
+  font-size: 65%;
+}
+
+#hhjyhruigg .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#hhjyhruigg .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#hhjyhruigg .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#hhjyhruigg .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#hhjyhruigg .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#hhjyhruigg .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#hhjyhruigg .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#hhjyhruigg .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#hhjyhruigg div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_col_headings header">
+<th id="Entidad" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Entidad</th>
+<th id="Campo" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Campo</th>
+<th id="Descripcion" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Descripción</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="Entidad">Centro</td>
+<td class="gt_row gt_left" headers="Campo">id_centro</td>
+<td class="gt_row gt_left" headers="Descripcion">Identificador único del centro educativo</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Entidad">Centro</td>
+<td class="gt_row gt_left" headers="Campo">lat / lon</td>
+<td class="gt_row gt_left" headers="Descripcion">Coordenadas del centro</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Entidad">Parada</td>
+<td class="gt_row gt_left" headers="Campo">id_parada</td>
+<td class="gt_row gt_left" headers="Descripcion">Identificador único de la parada</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Entidad">Parada</td>
+<td class="gt_row gt_left" headers="Campo">alumnos</td>
+<td class="gt_row gt_left" headers="Descripcion">Nº de alumnos que suben en esa parada</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Entidad">Vehiculo</td>
+<td class="gt_row gt_left" headers="Campo">plazas_ordinarias</td>
+<td class="gt_row gt_left" headers="Descripcion">Capacidad del vehículo (alumnos)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Entidad">Lote_Transporte</td>
+<td class="gt_row gt_left" headers="Campo">id_empresa</td>
+<td class="gt_row gt_left" headers="Descripcion">Empresa adjudicataria del lote</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Entidad">Ruta</td>
+<td class="gt_row gt_left" headers="Campo">id_vehiculo</td>
+<td class="gt_row gt_left" headers="Descripcion">Vehículo asignado a la ruta</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Entidad">Ruta_Detalle</td>
+<td class="gt_row gt_left" headers="Campo">orden_parada</td>
+<td class="gt_row gt_left" headers="Descripcion">Secuencia de recogida dentro de la ruta</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+<div id="3ade8a4a-fb1d-4a6c-8409-ac45482d5fc9" class="hidden html-fill-item html-fill-container">
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /container fluid -->
+
+<script type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (_event) {
+  if (window.bslib.Card) {
+    window.bslib.Card.initializeAllCards();
+  }
+}); 
+</script>
+  
+
+
+
+</body></html>
