@@ -1,11 +1,35 @@
 # Transporte Escolar — Optimización de Rutas (VRP básico)
 
+[![Dashboard en vivo](https://img.shields.io/badge/dashboard-en%20vivo-2E86AB?style=flat-square)](https://TU-USUARIO.quarto.pub/transporte-escolar-vrp/)
+[![R](https://img.shields.io/badge/R-4.6-276DC3?style=flat-square&logo=r)](https://www.r-project.org/)
+[![Quarto](https://img.shields.io/badge/Quarto-dashboard-75AADB?style=flat-square)](https://quarto.org/)
+
 Caso de estudio de portfolio: optimización de rutas de transporte escolar,
 combinando un **modelo de datos real** (extraído de un documento de
 requerimientos funcionales de un módulo de transporte interinstitucional)
 con la **metodología de optimización** descrita en Bertsimas et al. (2019),
 *"Optimizing schools' start time and bus routes"* (PNAS) — el caso real de
 Boston Public Schools.
+
+**[Ver el dashboard interactivo →](https://TU-USUARIO.quarto.pub/transporte-escolar-vrp/)**
+
+---
+
+## Vista previa
+
+<p align="center">
+  <img src="img/overview.png" alt="Overview del dashboard: KPIs y mapa de rutas optimizadas" width="800">
+</p>
+
+<p align="center"><em>Mapa de rutas optimizadas por vehículo, con KPIs de kilometraje, ahorro y ocupación.</em></p>
+
+<p align="center">
+  <img src="img/modelo-datos.png" alt="Diagrama entidad-relación del modelo de datos" width="800">
+</p>
+
+<p align="center"><em>Modelo de datos derivado del documento de requerimientos funcionales.</em></p>
+
+---
 
 ## Motivación
 
@@ -18,6 +42,17 @@ Boston Public Schools.
 Este proyecto toma el modelo de datos del primer documento y le aplica una
 versión simplificada del segundo: un **Vehicle Routing Problem (VRP)
 capacitado**, resuelto con una heurística de vecino más cercano.
+
+## Resultado
+
+Sobre un dataset sintético de 6 centros y 33 paradas, la heurística de
+optimización logró:
+
+| Métrica | Sin optimizar | Optimizado |
+|---|---|---|
+| Kilómetros totales | 41.8 km | **35.9 km** |
+| Ahorro | — | **14.0 %** |
+| Ocupación media de vehículos | — | 85.8 % |
 
 ## Alcance de esta versión (nivel básico)
 
@@ -44,6 +79,7 @@ transporte-escolar-vrp/
 │   ├── 01_generate_data.R  # Genera el dataset sintético
 │   ├── 02_vrp_heuristic.R  # Resuelve el VRP (vecino más cercano + capacidad)
 │   └── 03_kpis.R           # Calcula KPIs y compara vs. escenario sin optimizar
+├── img/                    # Capturas usadas en este README
 └── data/
     └── synthetic/          # CSVs generados (no versionados, ver .gitignore)
 ```
