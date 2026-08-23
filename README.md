@@ -1,6 +1,6 @@
 # Transporte Escolar — Optimización de Rutas (VRP básico)
 
-[![Dashboard en vivo](https://img.shields.io/badge/dashboard-en%20vivo-2E86AB?style=flat-square)](https://TU-USUARIO.quarto.pub/transporte-escolar-vrp/)
+[![Dashboard en vivo](https://img.shields.io/badge/dashboard-en%20vivo-2E86AB?style=flat-square)](https://gdaguerre-dot.github.io/Transporte-escolar-vrp/)
 [![R](https://img.shields.io/badge/R-4.6-276DC3?style=flat-square&logo=r)](https://www.r-project.org/)
 [![Quarto](https://img.shields.io/badge/Quarto-dashboard-75AADB?style=flat-square)](https://quarto.org/)
 
@@ -11,7 +11,7 @@ con la **metodología de optimización** descrita en Bertsimas et al. (2019),
 *"Optimizing schools' start time and bus routes"* (PNAS) — el caso real de
 Boston Public Schools.
 
-**[Ver el dashboard interactivo →](https://TU-USUARIO.quarto.pub/transporte-escolar-vrp/)**
+**[Ver el dashboard interactivo →](https://gdaguerre-dot.github.io/Transporte-escolar-vrp/)**
 
 ---
 
@@ -80,6 +80,8 @@ transporte-escolar-vrp/
 │   ├── 02_vrp_heuristic.R  # Resuelve el VRP (vecino más cercano + capacidad)
 │   └── 03_kpis.R           # Calcula KPIs y compara vs. escenario sin optimizar
 ├── img/                    # Capturas usadas en este README
+├── docs/
+│   └── index.html          # Versión publicada (self-contained) del dashboard, servida por GitHub Pages
 └── data/
     └── synthetic/          # CSVs generados (no versionados, ver .gitignore)
 ```
@@ -104,6 +106,19 @@ quarto render dashboard.qmd
 o simplemente abrir `dashboard.qmd` en Positron/RStudio y hacer clic en
 **Render** (el propio dashboard corre el pipeline completo —
 `01 -> 02 -> 03` — en su chunk de setup).
+
+### Publicación
+
+El dashboard se publica como sitio estático con GitHub Pages, sirviendo un
+HTML autocontenido (todas las librerías embebidas) para que no dependa de
+archivos externos:
+
+```bash
+quarto render dashboard.qmd --embed-resources --output index.html
+```
+
+El `index.html` resultante se ubica en `docs/`, y GitHub Pages se configuró
+para servir esa carpeta (`Settings → Pages → Deploy from a branch → main /docs`).
 
 ## Metodología del VRP
 
