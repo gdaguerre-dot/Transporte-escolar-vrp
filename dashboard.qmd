@@ -168,6 +168,7 @@ rutas %>%
 ### Column {width="55%"}
 
 ```{mermaid}
+%%| mermaid-format: svg
 erDiagram
     EMPRESA ||--o{ LOTE_TRANSPORTE : adjudica
     LOTE_TRANSPORTE ||--o{ VEHICULO : incluye
