@@ -63,7 +63,7 @@ transporte-escolar-vrp/
 │   ├── 01_generate_data.R  # Genera el dataset sintético
 │   ├── 02_vrp_heuristic.R  # Resuelve el VRP (vecino más cercano + capacidad)
 │   └── 03_kpis.R           # Calcula KPIs y compara vs. escenario sin optimizar
-├── img/                    # Capturas usadas en este README
+├── images/                    # Capturas usadas en este README
 ├── docs/
 │   └── index.html          # Versión publicada (self-contained) del dashboard, servida por GitHub Pages
 └── data/
