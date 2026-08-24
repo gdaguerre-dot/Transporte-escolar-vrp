@@ -15,22 +15,6 @@ Boston Public Schools.
 
 ---
 
-## Vista previa
-
-<p align="center">
-  <img src="img/overview.png" alt="Overview del dashboard: KPIs y mapa de rutas optimizadas" width="800">
-</p>
-
-<p align="center"><em>Mapa de rutas optimizadas por vehículo, con KPIs de kilometraje, ahorro y ocupación.</em></p>
-
-<p align="center">
-  <img src="img/modelo-datos.png" alt="Diagrama entidad-relación del modelo de datos" width="800">
-</p>
-
-<p align="center"><em>Modelo de datos derivado del documento de requerimientos funcionales.</em></p>
-
----
-
 ## Motivación
 
 - El documento de requerimientos define el modelo de negocio: Empresas,
